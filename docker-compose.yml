@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  app:
+    image: jenkins/jenkins:lts
+    restart: always
+    volumes:
+      - jenkins_home:/var/jenkins_home
+    environment:
+      - VIRTUAL_HOST
+      - VIRTUAL_PORT=8080
+      - LETSENCRYPT_HOST
+      - LETSENCRYPT_EMAIL
+
+volumes:
+  jenkins_home:
+
+networks:
+  default:
+    external:
+      name: nginx-proxy
