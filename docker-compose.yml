@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   app:
-    build: jenkins-docker
+    image: jenkins/jenkins:lts
     restart: always
     volumes:
       - jenkins_home:/var/jenkins_home
