@@ -2,27 +2,16 @@ version: '3.8'
 
 services:
   jenkins:
-    image: jenkins/jenkins:lts
+    build: jenkins-docker
     restart: always
     volumes:
       - jenkins_home:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
     environment:
       - VIRTUAL_HOST
       - VIRTUAL_PORT=8080
       - LETSENCRYPT_HOST
       - LETSENCRYPT_EMAIL
-    ports:
-      - "50000:50000"
-  jenkins-slave:
-    build: jenkins-slave
-    restart: always
-    init: true
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    environment:
-      - JENKINS_URL=http://jenkins
-    depends_on:
-      - jenkins
 
 volumes:
   jenkins_home:
