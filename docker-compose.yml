@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 services:
   jenkins:
@@ -17,12 +17,27 @@ services:
       - LETSENCRYPT_EMAIL
     ports:
       - "50000:50000"
+  jenkins-docker:
+    image: docker:19.03-dind
+    restart: always
+    privileged: true
+    environment:
+      - DOCKER_TLS_CERTDIR=/certs
+    volumes:
+      - jenkins_docker_certs:/certs/client
+    networks:
+      default:
+        aliases:
+          - docker
   jenkins-agent:
     build: jenkins-agent
     restart: always
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
+      - jenkins_docker_certs:/certs/client:ro
     environment:
+      - DOCKER_HOST=tcp://docker:2376
+      - DOCKER_CERT_PATH=/certs/client
+      - DOCKER_TLS_VERIFY=1
       - JENKINS_URL=http://jenkins:8080
       - JENKINS_USER
       - JENKINS_PASS
@@ -30,9 +45,11 @@ services:
       - NODE_LABELS=docker
     depends_on:
       - jenkins
+      - jenkins-docker
 
 volumes:
   jenkins_home:
+  jenkins_docker_certs:
 
 networks:
   default:

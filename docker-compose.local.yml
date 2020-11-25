@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 services:
   jenkins:
@@ -14,19 +14,36 @@ services:
     ports:
       - "8080:8080"
       - "50000:50000"
+  jenkins-docker:
+    image: docker:19.03-dind
+    restart: "no"
+    privileged: true
+    environment:
+      - DOCKER_TLS_CERTDIR=/certs
+    volumes:
+      - jenkins_docker_certs:/certs/client
+    networks:
+      default:
+        aliases:
+          - docker
   jenkins-agent:
     build: jenkins-agent
     restart: "no"
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
     environment:
+      - DOCKER_HOST=tcp://docker:2376
+      - DOCKER_CERT_PATH=/certs/client
+      - DOCKER_TLS_VERIFY=1
       - JENKINS_URL=http://jenkins:8080
       - JENKINS_USER=admin
       - JENKINS_PASS=admin
       - JENKINS_WAIT_INTERVAL=5
       - NODE_NUM_EXECUTORS=2
+    volumes:
+      - jenkins_docker_certs:/certs/client:ro
     depends_on:
       - jenkins
+      - jenkins-docker
 
 volumes:
   jenkins_home:
+  jenkins_docker_certs:

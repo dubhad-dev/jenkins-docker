@@ -18,15 +18,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
       apt-transport-https \
-      ca-certificates curl \
+      ca-certificates \
+      curl \
       gnupg-agent \
       software-properties-common \
     && curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add - \
     && add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian $(lsb_release -cs) stable" \
-    && apt-get update && apt-get install -y --no-install-recommends \
-      docker-ce \
-      docker-ce-cli \
-      containerd.io \
+    && apt-get update && apt-get install -y --no-install-recommends docker-ce-cli \
     && rm -rf /var/lib/apt/lists/*
 
 RUN curl -L "https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose \
@@ -41,7 +39,10 @@ RUN pip install --no-cache-dir api4jenkins
 
 COPY agent.py /usr/share/jenkins/agent.py
 
-RUN mkdir -p /home/jenkins
+RUN groupadd -g 1000 jenkins
+RUN useradd -c "Jenkins user" -d /home/jenkins -u 1000 -g 1000 -m jenkins
+
+USER jenkins
 
 WORKDIR /home/jenkins
 
